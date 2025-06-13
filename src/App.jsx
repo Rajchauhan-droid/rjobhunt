@@ -6,6 +6,10 @@ import SignIn from "./pages/SignIn";
 import UserDashboard from "./pages/UserDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import PrivateRoute from "./components/PrivateRoute";
+import Verify from "./pages/Verify"; // Add this
+import ForgotPassword from "./pages/ForgotPassword";
+
+
 
 function App() {
   return (
@@ -17,6 +21,9 @@ function App() {
         {/* Public routes */}
         <Route path="/signin" element={<SignIn />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/verify" element={<Verify />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+
 
         {/* Protected user route */}
         <Route
@@ -30,7 +37,7 @@ function App() {
 
         {/* Protected admin route */}
         <Route
-          path="/admindashboard"
+          path="/admin-dashboard"
           element={
             <PrivateRoute allowedRole="admin">
               <AdminDashboard />

@@ -1,23 +1,24 @@
 // src/pages/Register.jsx
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { v4 as uuidv4 } from "uuid";
+import { useNavigate, Link } from "react-router-dom";
+import axios from "axios";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Register = () => {
   const [form, setForm] = useState({
-    name: "Raj Chauhan",
-    email: "raj@example.com",
-    password: "Raj@123",
-    confirmPassword: "Raj@123",
-    phoneNumber: "9876543210",
-    gender: "Male",
-    dateOfBirth: "1997-05-15",
-    address: "123 Main Street, Toronto, ON",
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    phoneNumber: "",
+    gender: "",
+    dateOfBirth: "",
+    address: "",
   });
 
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -26,34 +27,34 @@ const Register = () => {
 
   const validateForm = () => {
     if (Object.values(form).some((v) => !v)) {
-      setError("All fields are required.");
+      toast.warn("All fields are required.", { position: "top-center" });
       return false;
     }
+
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(form.email)) {
-      setError("Please enter a valid email.");
+      toast.warn("Please enter a valid email address.", { position: "top-center" });
       return false;
     }
+
     if (form.password.length < 6) {
-      setError("Password must be at least 6 characters.");
+      toast.warn("Password must be at least 6 characters.", { position: "top-center" });
       return false;
     }
+
     if (form.password !== form.confirmPassword) {
-      setError("Passwords do not match.");
+      toast.warn("Passwords do not match.", { position: "top-center" });
       return false;
     }
+
     return true;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
-    setSuccess("");
-
     if (!validateForm()) return;
 
     const user = {
-      publicId: uuidv4(),
       name: form.name,
       email: form.email,
       password: form.password,
@@ -63,20 +64,33 @@ const Register = () => {
       address: form.address,
     };
 
-    // Save to localStorage
-    localStorage.setItem("registeredUser", JSON.stringify(user));
+    try {
+      setLoading(true);
+      const res = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/auth/addNewUser`, user, {
+        headers: { "Content-Type": "application/json" },
+      });
 
-    setSuccess("Registration successful ✅");
-    setTimeout(() => navigate("/sign-in"), 1500);
+      if (res.data.success) {
+        toast.success("Registration successful! Please verify your email.", { position: "top-center" });
+        setTimeout(() => navigate("/signin"), 2000); // ✅ fixed route
+      } else {
+        toast.error(res.data.message || "Registration failed.", { position: "top-center" });
+      }
+    } catch (err) {
+      if (err.response?.data?.message === "Email already exists") {
+        toast.error("Email already exists. Try logging in.", { position: "top-center" });
+      } else {
+        toast.error("Network error or server issue.", { position: "top-center" });
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="min-h-screen bg-[url('/beach.jpg')] bg-cover bg-center flex items-center justify-center px-4">
       <div className="bg-white bg-opacity-90 p-8 rounded-lg shadow-xl w-full max-w-2xl animate-slide-up">
         <h2 className="text-3xl font-bold text-center text-blue-800 mb-6">Create an Account</h2>
-
-        {error && <p className="text-red-600 text-center text-sm mb-3">{error}</p>}
-        {success && <p className="text-green-600 text-center text-sm mb-3">{success}</p>}
 
         <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <input name="name" placeholder="Full Name" value={form.name} onChange={handleChange} className="input" />
@@ -87,6 +101,7 @@ const Register = () => {
             <option value="">Select Gender</option>
             <option>Male</option>
             <option>Female</option>
+            <option>Other</option>
           </select>
           <input type="date" name="dateOfBirth" value={form.dateOfBirth} onChange={handleChange} className="input" />
           <input
@@ -106,7 +121,7 @@ const Register = () => {
             className="input"
           />
 
-          <div className="col-span-2 text-right -mt-2 text-sm">
+          <div className="col-span-2 text-right text-sm -mt-2">
             <button
               type="button"
               onClick={() => setShowPassword((prev) => !prev)}
@@ -119,19 +134,21 @@ const Register = () => {
           <div className="col-span-2">
             <button
               type="submit"
-              className="w-full bg-blue-700 text-white py-2 px-4 rounded hover:bg-blue-800 transition"
+              disabled={loading}
+              className={`w-full ${loading ? "bg-gray-500" : "bg-blue-700 hover:bg-blue-800"} text-white py-2 px-4 rounded transition`}
             >
-              Register
+              {loading ? "Registering..." : "Register"}
             </button>
             <p className="text-sm text-center mt-4">
               Already registered?{" "}
-              <a href="/signin" className="text-blue-600 hover:underline">
+              <Link to="/signin" className="text-blue-600 hover:underline">
                 Sign In
-              </a>
+              </Link>
             </p>
           </div>
         </form>
       </div>
+      <ToastContainer />
     </div>
   );
 };

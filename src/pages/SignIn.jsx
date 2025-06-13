@@ -1,23 +1,6 @@
-import React, { useState } from "react";
+// src/pages/SignIn.jsx
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-
-
-useEffect(() => {
-  const existing = localStorage.getItem("registeredUser");
-  if (!existing) {
-    localStorage.setItem("registeredUser", JSON.stringify({
-      name: "Admin Raj",
-      email: "admin@example.com",
-      password: "Admin@123",
-      role: "admin",
-      phoneNumber: "1234567890",
-      gender: "Male",
-      dateOfBirth: "1990-01-01",
-      address: "123 Admin Street"
-    }));
-  }
-}, []);
-
 
 const SignIn = () => {
   const [form, setForm] = useState({
@@ -25,6 +8,7 @@ const SignIn = () => {
     password: "",
     role: "user",
   });
+
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -32,6 +16,43 @@ const SignIn = () => {
   const [forgotEmail, setForgotEmail] = useState("");
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const savedUser = localStorage.getItem("registeredUser");
+    const savedAdmin = localStorage.getItem("adminUser");
+
+    if (!savedUser) {
+      localStorage.setItem(
+        "registeredUser",
+        JSON.stringify({
+          name: "Raj Chauhan",
+          email: "raj@example.com",
+          password: "Raj@123",
+          role: "user",
+          phoneNumber: "9876543210",
+          gender: "Male",
+          dateOfBirth: "1997-05-15",
+          address: "123 Main Street, Toronto, ON",
+        })
+      );
+    }
+
+    if (!savedAdmin) {
+      localStorage.setItem(
+        "adminUser",
+        JSON.stringify({
+          name: "Admin Raj",
+          email: "admin@example.com",
+          password: "Admin@123",
+          role: "admin",
+          phoneNumber: "1234567890",
+          gender: "Male",
+          dateOfBirth: "1990-01-01",
+          address: "123 Admin Street",
+        })
+      );
+    }
+  }, []);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -43,18 +64,18 @@ const SignIn = () => {
     setSuccess("");
 
     const savedUser = JSON.parse(localStorage.getItem("registeredUser"));
-    const dummyAdmin = {
-      name: "Admin",
-      email: "admin@example.com",
-      password: "admin123",
-      role: "admin",
-    };
+    const savedAdmin = JSON.parse(localStorage.getItem("adminUser"));
 
     if (form.role === "admin") {
-      if (form.email === dummyAdmin.email && form.password === dummyAdmin.password) {
-        localStorage.setItem("loggedInUser", JSON.stringify(dummyAdmin));
-        setSuccess(`Logged in as admin ✅`);
-        setTimeout(() => navigate("/admin-dashboard"), 1500);
+      if (
+        form.email === savedAdmin.email &&
+        form.password === savedAdmin.password
+      ) {
+        localStorage.setItem("loggedInUser", JSON.stringify(savedAdmin));
+        setSuccess("Logged in as Admin ✅");
+        setTimeout(() => {
+          window.location.href = "/admin-dashboard";
+        }, 1000);
         return;
       } else {
         setError("Invalid admin credentials.");
@@ -62,33 +83,44 @@ const SignIn = () => {
       }
     }
 
-    if (!savedUser) {
-      setError("No user registered. Please register first.");
-      return;
+    if (form.role === "user") {
+      if (!savedUser) {
+        setError("No user registered. Please register first.");
+        return;
+      }
+
+      if (
+        form.email === savedUser.email &&
+        form.password === savedUser.password
+      ) {
+        localStorage.setItem("loggedInUser", JSON.stringify(savedUser));
+        setSuccess(`Welcome, ${savedUser.name}! Redirecting...`);
+        setTimeout(() => {
+          window.location.href = "/user-dashboard";
+        }, 1000);
+        return;
+      } else {
+        setError("Invalid user credentials.");
+        return;
+      }
     }
 
-    if (
-      form.email !== savedUser.email ||
-      form.password !== savedUser.password ||
-      form.role !== "user"
-    ) {
-      setError("Invalid user credentials or role mismatch.");
-      return;
-    }
-
-    setSuccess(`You are successfully logged in @${savedUser.name}`);
-    localStorage.setItem("loggedInUser", JSON.stringify(savedUser));
-
-    setTimeout(() => navigate("/dashboard"), 1500);
+    setError("Please select a valid role.");
   };
 
   const handleForgotPassword = () => {
     const savedUser = JSON.parse(localStorage.getItem("registeredUser"));
-    if (savedUser && forgotEmail === savedUser.email) {
-      alert(`Your password is: ${savedUser.password}`);
+    const savedAdmin = JSON.parse(localStorage.getItem("adminUser"));
+
+    const user =
+      form.role === "admin" ? savedAdmin : form.role === "user" ? savedUser : null;
+
+    if (user && forgotEmail === user.email) {
+      alert(`Your password is: ${user.password}`);
     } else {
       alert("Email not found!");
     }
+
     setShowForgot(false);
   };
 
@@ -108,6 +140,7 @@ const SignIn = () => {
             onChange={handleChange}
             className="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:border-blue-500"
           />
+
           <div className="relative">
             <input
               type={showPassword ? "text" : "password"}
@@ -126,7 +159,6 @@ const SignIn = () => {
             </button>
           </div>
 
-          {/* Role selection */}
           <div className="flex justify-between text-sm">
             <label>
               <input
@@ -163,6 +195,7 @@ const SignIn = () => {
               Register
             </a>
           </p>
+
           <p
             onClick={() => setShowForgot(true)}
             className="text-sm text-blue-600 cursor-pointer hover:underline text-right"
@@ -171,7 +204,6 @@ const SignIn = () => {
           </p>
         </form>
 
-        {/* Forgot Password Modal */}
         {showForgot && (
           <div className="fixed inset-0 bg-black bg-opacity-30 flex justify-center items-center z-50">
             <div className="bg-white p-6 rounded shadow-xl w-full max-w-sm">

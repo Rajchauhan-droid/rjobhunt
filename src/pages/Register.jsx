@@ -6,9 +6,9 @@ import { v4 as uuidv4 } from "uuid";
 const Register = () => {
   const [form, setForm] = useState({
     name: "Raj Chauhan",
-    email: "rajchauhan@example.com",
-    password: "Passw0rd!",
-    confirmPassword: "Passw0rd!",
+    email: "raj@example.com",
+    password: "Raj@123",
+    confirmPassword: "Raj@123",
     phoneNumber: "9876543210",
     gender: "Male",
     dateOfBirth: "1997-05-15",

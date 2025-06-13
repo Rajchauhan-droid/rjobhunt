@@ -1,33 +1,45 @@
+// src/App.jsx
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Register from "./pages/Register";
 import SignIn from "./pages/SignIn";
+import UserDashboard from "./pages/UserDashboard";
+import AdminDashboard from "./pages/AdminDashboard";
 import PrivateRoute from "./components/PrivateRoute";
-
-const Dashboard = () => (
-  <div className="flex justify-center items-center h-screen text-3xl text-green-600">
-    Welcome to Dashboard ✅
-  </div>
-);
 
 function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<SignIn />} />
+        {/* Default redirect to /signin */}
+        <Route path="/" element={<Navigate to="/signin" replace />} />
+
+        {/* Public routes */}
         <Route path="/signin" element={<SignIn />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/dashboard" element={<Dashboard />} /> 
 
+        {/* Protected user route */}
         <Route
-          path="/dashboard"
+          path="/user-dashboard"
           element={
-            <PrivateRoute>
-              <Dashboard />
+            <PrivateRoute allowedRole="user">
+              <UserDashboard />
             </PrivateRoute>
           }
         />
-        <Route path="*" element={<h2 className="p-6">404: Page not found</h2>} />
+
+        {/* Protected admin route */}
+        <Route
+          path="/admindashboard"
+          element={
+            <PrivateRoute allowedRole="admin">
+              <AdminDashboard />
+            </PrivateRoute>
+          }
+        />
+
+        {/* Fallback route */}
+        <Route path="*" element={<h2 className="p-6 text-center">404: Page not found</h2>} />
       </Routes>
     </Router>
   );

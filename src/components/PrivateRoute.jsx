@@ -24,19 +24,7 @@ const PrivateRoute = ({ children, allowedRole }) => {
   return (
     <div style={{ padding: "1.5rem" }}>
       <div style={{ display: "flex", justifyContent: "space-between" }}>
-        <button
-          onClick={handleLogout}
-          style={{
-            backgroundColor: "#e74c3c",
-            color: "#fff",
-            border: "none",
-            padding: "6px 12px",
-            borderRadius: "4px",
-            cursor: "pointer"
-          }}
-        >
-          Logout
-        </button>
+        
       </div>
       <hr style={{ margin: "1rem 0" }} />
       {children}

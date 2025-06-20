@@ -1,15 +1,12 @@
-// src/components/ProfileMenu.jsx
+// File: src/components/AdminProfileMenu.jsx
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
-const ProfileMenu = () => {
-  const user =
-    JSON.parse(localStorage.getItem("loggedInUser")) ||
-    JSON.parse(localStorage.getItem("adminUser"));
-
+const AdminProfileMenu = () => {
+  const user = JSON.parse(localStorage.getItem("adminUser"));
+  const [open, setOpen] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
-  const [open, setOpen] = useState(false); // ✅ Added open state
   const menuRef = useRef(null);
   const navigate = useNavigate();
 
@@ -22,25 +19,17 @@ const ProfileMenu = () => {
       console.warn("Logout API call failed:", err);
     } finally {
       localStorage.removeItem("authToken");
-      localStorage.removeItem("loggedInUser");
       localStorage.removeItem("adminUser");
-      localStorage.removeItem("registeredUser");
       navigate("/signin");
     }
   };
 
-  const handleClickLogout = () => {
-    setShowLogoutModal(true);
-    setOpen(false);
-  };
-
-  const handleClickOutside = (e) => {
-    if (menuRef.current && !menuRef.current.contains(e.target)) {
-      setOpen(false);
-    }
-  };
-
   useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setOpen(false);
+      }
+    };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
@@ -54,31 +43,24 @@ const ProfileMenu = () => {
         >
           <span className="text-gray-600 text-xl">👤</span>
         </button>
-
         {open && (
           <div className="origin-top-right absolute right-0 mt-2 w-64 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
             <div className="p-4 border-b">
-              <div className="font-semibold">{user?.name || "User"}</div>
+              <div className="font-semibold">{user?.name || "Admin"}</div>
               <div className="text-sm text-gray-500">{user?.email}</div>
             </div>
             <div className="py-1">
               <button
-                onClick={() => {
-                  navigate("/account-settings");
-                  setOpen(false);
-                }}
                 className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+                onClick={() => navigate("/admin-dashboard/settings")}
               >
                 Account Settings
               </button>
-              <button className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100">
-                Privacy Policy
-              </button>
-              <button className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100">
-                Terms
-              </button>
               <button
-                onClick={handleClickLogout}
+                onClick={() => {
+                  setShowLogoutModal(true);
+                  setOpen(false);
+                }}
                 className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-100"
               >
                 Log out
@@ -116,4 +98,4 @@ const ProfileMenu = () => {
   );
 };
 
-export default ProfileMenu;
+export default AdminProfileMenu;

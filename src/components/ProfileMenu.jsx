@@ -15,8 +15,12 @@ const ProfileMenu = () => {
 
   const handleLogout = async () => {
     try {
+      const token = localStorage.getItem("authToken");
+
       await axios.post(`${import.meta.env.VITE_API_BASE_URL}/auth/logout`, {}, {
-        withCredentials: true,
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
     } catch (err) {
       console.warn("Logout API call failed:", err);

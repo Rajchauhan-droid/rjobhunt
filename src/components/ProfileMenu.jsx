@@ -2,6 +2,8 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import ActionHistoryTable from "./ActionHistoryTable"; // update path if different
+
 
 const ProfileMenu = () => {
   const user =
@@ -12,6 +14,9 @@ const ProfileMenu = () => {
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const menuRef = useRef(null);
   const navigate = useNavigate();
+
+  const [showHistory, setShowHistory] = useState(false);
+
 
   const handleLogout = async () => {
     try {
@@ -69,6 +74,7 @@ const ProfileMenu = () => {
               <button className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100">Account Settings</button>
               <button className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100">Privacy Policy</button>
               <button className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100">Terms</button>
+
               <button
                 onClick={handleClickLogout}
                 className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-100"

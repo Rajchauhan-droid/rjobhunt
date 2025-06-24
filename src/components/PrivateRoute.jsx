@@ -2,22 +2,35 @@
 import React from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 
-const PrivateRoute = ({ children, allowedRole }) => {
-  const user = JSON.parse(localStorage.getItem("loggedInUser"));
+const PrivateRoute = ({ children, allowedRole = [] }) => {
+  const user =
+    JSON.parse(localStorage.getItem("loggedInUser")) ||
+    JSON.parse(localStorage.getItem("adminUser"));
+
   const navigate = useNavigate();
 
   if (!user) {
-    console.warn("Not logged in. Redirecting to /signin...");
+    console.warn("🚫 Not logged in. Redirecting to /signin...");
     return <Navigate to="/signin" replace />;
   }
+  const role = user.role?.toLowerCase(); // e.g., "user", "admin"
 
-  if (allowedRole && user.role !== allowedRole) {
-    console.warn("Role mismatch. Redirecting to /unauthorized...");
+  // DEBUG
+  console.log("✅ Current user role:", role);
+  console.log("✅ Allowed roles:", allowedRole);
+  console.log("✅ includes check:", allowedRole.includes(role));
+    debugger;
+
+  // 🔐 Role check
+  if (Array.isArray(allowedRole) && !allowedRole.includes(role)) {
+      debugger;
+
+    console.warn("❌ Role mismatch. Redirecting to /unauthorized...");
     return <Navigate to="/unauthorized" replace />;
   }
 
   const handleLogout = () => {
-    localStorage.removeItem("loggedInUser");
+    localStorage.clear();
     navigate("/signin");
   };
 
@@ -32,7 +45,7 @@ const PrivateRoute = ({ children, allowedRole }) => {
             border: "none",
             padding: "6px 12px",
             borderRadius: "4px",
-            cursor: "pointer"
+            cursor: "pointer",
           }}
         >
           Logout

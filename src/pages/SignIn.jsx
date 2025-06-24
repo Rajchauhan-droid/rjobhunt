@@ -39,8 +39,18 @@ const SignIn = () => {
         const { token, email, uid, role, name } = resData.data;
         const normalizedRole = role === "ROLE_ADMIN" ? "admin" : "user";
 
+        // ✅ Clear old sessions
+        localStorage.removeItem("loggedInUser");
+        localStorage.removeItem("adminUser");
+
+        // ✅ Save new session based on role
         localStorage.setItem("authToken", token);
-        localStorage.setItem("loggedInUser", JSON.stringify({ uid, email, role: normalizedRole, name }));
+        const userObj = { uid, email, role: normalizedRole, name };
+
+localStorage.setItem(
+  "loggedInUser",
+  JSON.stringify({ uid, email, role: normalizedRole, name })
+);
 
         toast.success("Login successful! Redirecting...", { position: "top-center" });
 

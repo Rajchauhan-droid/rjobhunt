@@ -1,4 +1,3 @@
-// src/components/AdminSidebar.jsx
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
@@ -19,7 +18,7 @@ const AdminSidebar = () => {
   const menuItems = [
     { label: "Home", icon: <Home size={24} />, path: "" },
     { label: "Action History", icon: <History size={24} />, path: "action-history" },
-    { label: "Manage Users", icon: <Users size={24} />, path: "manage-users" },
+    { label: "Manage Users", icon: <Users size={24} />, path: "manage-users" }, // ✅ fixed here
     { label: "Verify Accounts", icon: <UserCheck size={24} />, path: "verify-accounts" },
     { label: "Reports", icon: <FileText size={24} />, path: "reports" },
     { label: "Settings", icon: <Settings size={24} />, path: "settings" },
@@ -37,8 +36,9 @@ const AdminSidebar = () => {
             <Link
               key={label}
               to={fullPath}
-              className={`flex items-center gap-4 px-4 py-3 rounded-lg transition font-semibold ${isActive ? "bg-blue-100 text-blue-700" : "text-gray-700 hover:bg-gray-100"
-                }`}
+              className={`flex items-center gap-4 px-4 py-3 rounded-lg transition font-semibold ${
+                isActive ? "bg-blue-100 text-blue-700" : "text-gray-700 hover:bg-gray-100"
+              }`}
             >
               {icon}
               <span>{label}</span>

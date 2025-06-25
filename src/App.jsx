@@ -13,6 +13,14 @@ import PrivateRoute from "./components/PrivateRoute";
 
 import UserDashboardHome from "./pages/UserDashboard"; // You can rename as needed
 import AdminDashboardHome from "./pages/AdminDashboardLayout"; // You can rename as needed
+import AccountSettings from "./pages/AccountSettings";
+import PersonalInfo from "./pages/account/PersonalInfo";
+import LoginSecurity from "./pages/account/LoginSecurity";
+import ManageUsers from "./pages/admin/ManageUsers";
+
+
+
+
 
 function App() {
   return (
@@ -29,6 +37,43 @@ function App() {
         <Route path="/unauthorized" element={<UnauthorizedPage />} />
 
         {/* User Dashboard Layout */}
+<Route
+  path="/admin-dashboard/manage-users"
+  element={
+    <PrivateRoute allowedRole={["admin"]}>
+      <ManageUsers />
+    </PrivateRoute>
+  }
+/>
+
+
+<Route
+  path="/account/login-security"
+  element={
+    <PrivateRoute allowedRole={["user", "admin"]}>
+      <LoginSecurity />
+    </PrivateRoute>
+  }
+/>
+
+<Route
+  path="/account-settings"
+  element={
+    <PrivateRoute allowedRole={["user", "admin"]}>
+      <AccountSettings />
+    </PrivateRoute>
+  }
+/>
+
+<Route
+  path="/account/personal-info"
+  element={
+    <PrivateRoute allowedRole={["user", "admin"]}>
+      <PersonalInfo />
+    </PrivateRoute>
+  }
+/>
+
         <Route
           path="/user-dashboard"
           element={

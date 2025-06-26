@@ -1,233 +1,198 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const PersonalInfo = () => {
-  const navigate = useNavigate();
-
-  // Field states
-  const [firstName, setFirstName] = useState("Raj");
-  const [lastName, setLastName] = useState("Chauhan");
-  const [email, setEmail] = useState("raajchauh@gmail.com");
-  const [phone, setPhone] = useState("");
-  const [dob, setDob] = useState("1999-01-01");
-  const [professionalInfo, setProfessionalInfo] = useState("");
-  const [address, setAddress] = useState("Toronto, CA");
-
-  // Editing flags
-  const [editing, setEditing] = useState({
-    name: false,
-    email: false,
-    phone: false,
-    dob: false,
-    professional: false,
-    address: false,
+  const [userData, setUserData] = useState({});
+  const [editMode, setEditMode] = useState(false);
+  const [formData, setFormData] = useState({
+    email: "",
+    gender: "",
+    phoneNumber: "",
+    dateOfBirth: "",
+    address: ""
   });
 
-  const handleCancel = (field) => {
-    setEditing((prev) => ({ ...prev, [field]: false }));
+  const navigate = useNavigate();
+  const token = localStorage.getItem("authToken");
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/users`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        const user = res.data.data;
+        setUserData(user);
+        setFormData({
+          email: user.email || "",
+          gender: user.gender || "",
+          phoneNumber: user.phoneNumber || "",
+          dateOfBirth: user.dateOfBirth ? user.dateOfBirth.split("T")[0] : "",
+          address: user.address || ""
+        });
+      } catch (err) {
+        console.error("Error fetching user info", err);
+        toast.error("❌ Failed to load user data");
+      }
+    };
+    fetchUser();
+  }, []);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSave = (field) => {
-    console.log("✅ Saved:", {
-      firstName,
-      lastName,
-      email,
-      phone,
-      dob,
-      professionalInfo,
-      address,
-    });
-    setEditing((prev) => ({ ...prev, [field]: false }));
+  const handleSave = async () => {
+    try {
+      const res = await axios.patch(
+        `${import.meta.env.VITE_API_BASE_URL}/api/users`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+
+      const updatedUser = res.data?.data;
+      const oldEmail = userData.email;
+      const newEmail = updatedUser?.email;
+
+      setEditMode(false);
+
+      if (newEmail && oldEmail !== newEmail) {
+        toast.success("✅ Email updated. Logging you out...", {
+          onClose: () => {
+            localStorage.removeItem("authToken");
+            localStorage.removeItem("loggedInUser");
+            navigate("/signin");
+          },
+          autoClose: 2000
+        });
+      } else {
+        setUserData(updatedUser);
+        toast.success("✅ Changes applied successfully.");
+      }
+    } catch (err) {
+      console.error("❌ Error updating info", err);
+      toast.error("❌ Error saving changes.");
+    }
   };
 
   return (
-    <div className="min-h-screen bg-blue-50 p-6 md:p-12">
+    <div className="min-h-screen bg-[#f8fbfd] px-4 py-8 md:px-20 font-inter">
+      <ToastContainer />
       <div className="max-w-6xl mx-auto">
-        <div className="flex justify-between items-center mb-6">
-          <div className="text-sm text-gray-500">
-            <span
-              className="text-blue-600 cursor-pointer"
-              onClick={() => navigate("/account-settings")}
-            >
-              Account
-            </span>{" "}
-            &gt; Personal info
-          </div>
-          <button
-            onClick={() => navigate("/user-dashboard")}
-            className="text-sm text-blue-600 hover:underline"
-          >
-            Back to Dashboard
-          </button>
+        <div className="flex justify-between items-center mb-6 text-base text-gray-600">
+          <span onClick={() => navigate("/account-settings")} className="text-blue-600 cursor-pointer font-medium">
+            ← Back to Account Settings
+          </span>
+          <span className="text-blue-600 cursor-pointer font-medium" onClick={() => navigate("/user-dashboard")}>
+            Dashboard
+          </span>
         </div>
 
-        <h2 className="text-3xl font-bold mb-6">Personal info</h2>
+        <h1 className="text-4xl font-bold text-gray-900 mb-8">Personal info</h1>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="space-y-6 lg:col-span-2">
-            {/* Name */}
-            <Section
-              title="Your name"
-              description="This is the name on your resume."
-              editing={editing.name}
-              onEdit={() => setEditing({ ...editing, name: true })}
-              onCancel={() => handleCancel("name")}
-              onSave={() => handleSave("name")}
-              fields={
-                editing.name ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                    <div>
-                      <label className="text-sm text-gray-600">First name</label>
-                      <input
-                        value={firstName}
-                        onChange={(e) => setFirstName(e.target.value)}
-                        className="w-full mt-1 px-4 py-2 border border-gray-300 rounded"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-sm text-gray-600">Last name</label>
-                      <input
-                        value={lastName}
-                        onChange={(e) => setLastName(e.target.value)}
-                        className="w-full mt-1 px-4 py-2 border border-gray-300 rounded"
-                      />
-                    </div>
-                  </div>
-                ) : (
-                  <p className="text-gray-800 text-lg">{firstName} {lastName}</p>
-                )
-              }
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2 bg-white rounded-xl shadow p-8 space-y-8">
+            <InfoField
+              label="Email"
+              value={formData.email || "Not provided"}
+              name="email"
+              type="email"
+              editMode={editMode}
+              handleChange={handleChange}
             />
+            <hr className="my-4" />
 
-            {/* Email */}
-            <Section
-              title="Email address"
-              editing={editing.email}
-              onEdit={() => setEditing({ ...editing, email: true })}
-              onCancel={() => handleCancel("email")}
-              onSave={() => handleSave("email")}
-              fields={
-                editing.email ? (
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full mt-3 px-4 py-2 border border-gray-300 rounded"
-                  />
-                ) : (
-                  <p className="mt-2 text-gray-600 text-sm">{email}</p>
-                )
-              }
+            <InfoField
+              label="Gender"
+              value={formData.gender || "Not provided"}
+              name="gender"
+              type="select"
+              options={["Male", "Female"]}
+              editMode={editMode}
+              handleChange={handleChange}
             />
+            <hr className="my-4" />
 
-            {/* Phone */}
-            <Section
-              title="Phone number"
-              editing={editing.phone}
-              onEdit={() => setEditing({ ...editing, phone: true })}
-              onCancel={() => handleCancel("phone")}
-              onSave={() => handleSave("phone")}
-              fields={
-                editing.phone ? (
-                  <input
-                    type="text"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    className="w-full mt-3 px-4 py-2 border border-gray-300 rounded"
-                  />
-                ) : (
-                  <p className="mt-2 text-gray-600 text-sm">
-                    {phone || "Not provided"}
-                  </p>
-                )
-              }
+            <InfoField
+              label="Phone number"
+              value={formData.phoneNumber || "Not provided"}
+              name="phoneNumber"
+              type="text"
+              editMode={editMode}
+              handleChange={handleChange}
             />
+            <hr className="my-4" />
 
-            {/* DOB */}
-            <Section
-              title="Date of Birth"
-              editing={editing.dob}
-              onEdit={() => setEditing({ ...editing, dob: true })}
-              onCancel={() => handleCancel("dob")}
-              onSave={() => handleSave("dob")}
-              fields={
-                editing.dob ? (
-                  <input
-                    type="date"
-                    value={dob}
-                    onChange={(e) => setDob(e.target.value)}
-                    className="w-full mt-3 px-4 py-2 border border-gray-300 rounded"
-                  />
-                ) : (
-                  <p className="mt-2 text-gray-600 text-sm">{dob}</p>
-                )
-              }
+            <InfoField
+              label="Date of Birth"
+              value={formData.dateOfBirth || "Not provided"}
+              name="dateOfBirth"
+              type="date"
+              editMode={editMode}
+              handleChange={handleChange}
             />
+            <hr className="my-4" />
 
-            {/* Professional Info */}
-            <Section
-              title="Professional information"
-              editing={editing.professional}
-              onEdit={() => setEditing({ ...editing, professional: true })}
-              onCancel={() => handleCancel("professional")}
-              onSave={() => handleSave("professional")}
-              fields={
-                editing.professional ? (
-                  <input
-                    type="text"
-                    value={professionalInfo}
-                    onChange={(e) => setProfessionalInfo(e.target.value)}
-                    className="w-full mt-3 px-4 py-2 border border-gray-300 rounded"
-                  />
-                ) : (
-                  <p className="mt-2 text-gray-600 text-sm">
-                    {professionalInfo || "Not provided"}
-                  </p>
-                )
-              }
+            <InfoField
+              label="Address"
+              value={formData.address || "Not provided"}
+              name="address"
+              type="text"
+              editMode={editMode}
+              handleChange={handleChange}
             />
+            <hr className="my-4" />
 
-            {/* Address */}
-            <Section
-              title="Address"
-              editing={editing.address}
-              onEdit={() => setEditing({ ...editing, address: true })}
-              onCancel={() => handleCancel("address")}
-              onSave={() => handleSave("address")}
-              fields={
-                editing.address ? (
-                  <input
-                    type="text"
-                    value={address}
-                    onChange={(e) => setAddress(e.target.value)}
-                    className="w-full mt-3 px-4 py-2 border border-gray-300 rounded"
-                  />
-                ) : (
-                  <p className="mt-2 text-gray-600 text-sm">
-                    {address || "Not provided"}
-                  </p>
-                )
-              }
-            />
+            <div className="pt-4 flex gap-6">
+              {editMode ? (
+                <>
+                  <button
+                    className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 font-semibold"
+                    onClick={handleSave}
+                  >
+                    Apply Changes
+                  </button>
+                  <button
+                    className="text-blue-600 hover:underline font-medium"
+                    onClick={() => setEditMode(false)}
+                  >
+                    Cancel
+                  </button>
+                </>
+              ) : (
+                <button
+                  className="text-blue-600 hover:underline text-base font-medium"
+                  onClick={() => setEditMode(true)}
+                >
+                  Edit Info
+                </button>
+              )}
+            </div>
           </div>
 
-          {/* Right Column */}
           <div className="space-y-6">
-            <div className="bg-white p-5 rounded-xl shadow">
-              <p className="text-sm text-gray-600 mb-2">Profile Strength</p>
+            <div className="bg-white p-6 rounded-xl shadow">
+              <p className="text-sm text-gray-600 mb-2 font-medium">Profile Strength</p>
               <div className="w-full bg-gray-200 h-3 rounded-full overflow-hidden">
-                <div className="bg-yellow-500 h-3" style={{ width: "60%" }}></div>
+                <div className="bg-yellow-500 h-3" style={{ width: "33%" }}></div>
               </div>
-              <p className="text-xs text-gray-600 mt-2 text-right">
-                60% Profile Strength
-              </p>
+              <p className="text-xs text-gray-600 mt-2 text-right">33% Profile Strength</p>
             </div>
-            <div className="bg-white p-5 rounded-xl shadow text-sm text-gray-600">
-              <div className="text-xl mb-2">👤</div>
-              <p className="font-semibold text-gray-800 mb-1">
-                What info is shared with others?
-              </p>
-              <p>
+            <div className="bg-white p-6 rounded-xl shadow text-sm text-gray-700">
+              <div className="text-2xl mb-2">👤</div>
+              <p className="font-semibold text-gray-900 mb-1">What info is shared with others?</p>
+              <p className="text-sm leading-relaxed">
                 Jobscan does not share your data unless you opt-in to be contacted by recruiters.
               </p>
             </div>
@@ -238,36 +203,33 @@ const PersonalInfo = () => {
   );
 };
 
-// 👇 Reusable Section Component
-const Section = ({ title, description, editing, onEdit, onSave, onCancel, fields }) => (
-  <div className="bg-white p-6 rounded-xl shadow">
-    <div className="flex justify-between items-start">
-      <div>
-        <p className="font-medium text-gray-800">{title}</p>
-        {description && <p className="text-sm text-gray-500">{description}</p>}
-      </div>
-      {!editing && (
-        <button onClick={onEdit} className="text-blue-600 text-sm hover:underline">
-          Edit
-        </button>
-      )}
-    </div>
-    <div className="mt-3">{fields}</div>
-    {editing && (
-      <div className="mt-4">
-        <button
-          onClick={onSave}
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm"
+const InfoField = ({ label, value, name, type, options, editMode, handleChange }) => (
+  <div>
+    <p className="text-lg font-semibold text-gray-800 mb-1">{label}</p>
+    {editMode ? (
+      type === "select" ? (
+        <select
+          name={name}
+          value={value}
+          onChange={handleChange}
+          className="w-full border px-4 py-3 rounded-lg text-base"
         >
-          Save
-        </button>
-        <button
-          onClick={onCancel}
-          className="ml-4 text-sm text-blue-600 hover:underline"
-        >
-          Cancel
-        </button>
-      </div>
+          <option value="">Select</option>
+          {options.map((opt) => (
+            <option key={opt} value={opt}>{opt}</option>
+          ))}
+        </select>
+      ) : (
+        <input
+          name={name}
+          type={type}
+          value={value}
+          onChange={handleChange}
+          className="w-full border px-4 py-3 rounded-lg text-base"
+        />
+      )
+    ) : (
+      <p className="text-gray-700 text-base font-normal">{value}</p>
     )}
   </div>
 );

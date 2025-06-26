@@ -16,8 +16,6 @@ const ActionHistoryPage = () => {
                 JSON.parse(localStorage.getItem("adminUser")) ||
                 JSON.parse(localStorage.getItem("loggedInUser"));
 
-            debugger;
-
             if (!token || !user?.role) {
                 navigate("/unauthorized");
                 return;
@@ -26,8 +24,6 @@ const ActionHistoryPage = () => {
             const role = user.role?.toLowerCase(); // "user" or "admin"
             const isAdminUser = role === "admin";
             const isRegularUser = role === "user";
-
-            debugger;
 
             if (!isAdminUser && !isRegularUser) {
                 navigate("/unauthorized");
@@ -47,7 +43,6 @@ const ActionHistoryPage = () => {
                         headers: { Authorization: `Bearer ${token}` },
                     }
                 );
-                debugger;
                 setData(res.data?.data || []);
             } catch (err) {
                 if ([401, 403].includes(err.response?.status)) {

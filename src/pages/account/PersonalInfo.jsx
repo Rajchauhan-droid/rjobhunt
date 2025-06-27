@@ -7,6 +7,7 @@ import "react-toastify/dist/ReactToastify.css";
 const PersonalInfo = () => {
   const [userData, setUserData] = useState({});
   const [editMode, setEditMode] = useState(false);
+  const [invalidFields, setInvalidFields] = useState([]);
   const [formData, setFormData] = useState({
     email: "",
     gender: "",
@@ -21,11 +22,14 @@ const PersonalInfo = () => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/users`, {
-          headers: {
-            Authorization: `Bearer ${token}`
+        const res = await axios.get(
+          `${import.meta.env.VITE_API_BASE_URL}/api/users`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
           }
-        });
+        );
         const user = res.data.data;
         setUserData(user);
         setFormData({
@@ -49,6 +53,38 @@ const PersonalInfo = () => {
   };
 
   const handleSave = async () => {
+    const invalids = [];
+
+    // Email validation
+    if (!formData.email || formData.email.trim() === "") {
+      toast.error("❌ Email is required!");
+      invalids.push("email");
+    } else {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(formData.email)) {
+        toast.error("❌ Please enter a valid email address!");
+        invalids.push("email");
+      }
+    }
+
+    // Phone number validation
+    if (!formData.phoneNumber || formData.phoneNumber.trim() === "") {
+      toast.error("❌ Phone number is required!");
+      invalids.push("phoneNumber");
+    } else {
+      const phoneRegex = /^\+?\d{7,15}$/; // basic international phone pattern
+      if (!phoneRegex.test(formData.phoneNumber)) {
+        toast.error("❌ Please enter a valid phone number!");
+        invalids.push("phoneNumber");
+      }
+    }
+
+    setInvalidFields(invalids);
+
+    if (invalids.length > 0) {
+      return; // Prevent submission if validation failed
+    }
+
     try {
       const res = await axios.patch(
         `${import.meta.env.VITE_API_BASE_URL}/api/users`,
@@ -66,6 +102,7 @@ const PersonalInfo = () => {
       const newEmail = updatedUser?.email;
 
       setEditMode(false);
+      setInvalidFields([]); // clear error highlights on success
 
       if (newEmail && oldEmail !== newEmail) {
         toast.success("✅ Email updated. Logging you out...", {
@@ -91,10 +128,16 @@ const PersonalInfo = () => {
       <ToastContainer />
       <div className="max-w-6xl mx-auto">
         <div className="flex justify-between items-center mb-6 text-base text-gray-600">
-          <span onClick={() => navigate("/account-settings")} className="text-blue-600 cursor-pointer font-medium">
+          <span
+            onClick={() => navigate("/account-settings")}
+            className="text-blue-600 cursor-pointer font-medium"
+          >
             ← Back to Account Settings
           </span>
-          <span className="text-blue-600 cursor-pointer font-medium" onClick={() => navigate("/user-dashboard")}>
+          <span
+            className="text-blue-600 cursor-pointer font-medium"
+            onClick={() => navigate("/user-dashboard")}
+          >
             Dashboard
           </span>
         </div>
@@ -110,6 +153,7 @@ const PersonalInfo = () => {
               type="email"
               editMode={editMode}
               handleChange={handleChange}
+              invalid={invalidFields.includes("email")}
             />
             <hr className="my-4" />
 
@@ -131,6 +175,7 @@ const PersonalInfo = () => {
               type="text"
               editMode={editMode}
               handleChange={handleChange}
+              invalid={invalidFields.includes("phoneNumber")}
             />
             <hr className="my-4" />
 
@@ -165,7 +210,10 @@ const PersonalInfo = () => {
                   </button>
                   <button
                     className="text-blue-600 hover:underline font-medium"
-                    onClick={() => setEditMode(false)}
+                    onClick={() => {
+                      setEditMode(false);
+                      setInvalidFields([]);
+                    }}
                   >
                     Cancel
                   </button>
@@ -183,17 +231,24 @@ const PersonalInfo = () => {
 
           <div className="space-y-6">
             <div className="bg-white p-6 rounded-xl shadow">
-              <p className="text-sm text-gray-600 mb-2 font-medium">Profile Strength</p>
+              <p className="text-sm text-gray-600 mb-2 font-medium">
+                Profile Strength
+              </p>
               <div className="w-full bg-gray-200 h-3 rounded-full overflow-hidden">
                 <div className="bg-yellow-500 h-3" style={{ width: "33%" }}></div>
               </div>
-              <p className="text-xs text-gray-600 mt-2 text-right">33% Profile Strength</p>
+              <p className="text-xs text-gray-600 mt-2 text-right">
+                33% Profile Strength
+              </p>
             </div>
             <div className="bg-white p-6 rounded-xl shadow text-sm text-gray-700">
               <div className="text-2xl mb-2">👤</div>
-              <p className="font-semibold text-gray-900 mb-1">What info is shared with others?</p>
+              <p className="font-semibold text-gray-900 mb-1">
+                What info is shared with others?
+              </p>
               <p className="text-sm leading-relaxed">
-                Jobscan does not share your data unless you opt-in to be contacted by recruiters.
+                Jobscan does not share your data unless you opt-in to be
+                contacted by recruiters.
               </p>
             </div>
           </div>
@@ -203,7 +258,16 @@ const PersonalInfo = () => {
   );
 };
 
-const InfoField = ({ label, value, name, type, options, editMode, handleChange }) => (
+const InfoField = ({
+  label,
+  value,
+  name,
+  type,
+  options,
+  editMode,
+  handleChange,
+  invalid
+}) => (
   <div>
     <p className="text-lg font-semibold text-gray-800 mb-1">{label}</p>
     {editMode ? (
@@ -212,11 +276,15 @@ const InfoField = ({ label, value, name, type, options, editMode, handleChange }
           name={name}
           value={value}
           onChange={handleChange}
-          className="w-full border px-4 py-3 rounded-lg text-base"
+          className={`w-full border px-4 py-3 rounded-lg text-base ${
+            invalid ? "border-red-500" : ""
+          }`}
         >
           <option value="">Select</option>
           {options.map((opt) => (
-            <option key={opt} value={opt}>{opt}</option>
+            <option key={opt} value={opt}>
+              {opt}
+            </option>
           ))}
         </select>
       ) : (
@@ -225,7 +293,10 @@ const InfoField = ({ label, value, name, type, options, editMode, handleChange }
           type={type}
           value={value}
           onChange={handleChange}
-          className="w-full border px-4 py-3 rounded-lg text-base"
+          required={name === "email" || name === "phoneNumber"}
+          className={`w-full border px-4 py-3 rounded-lg text-base ${
+            invalid ? "border-red-500" : ""
+          }`}
         />
       )
     ) : (

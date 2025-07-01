@@ -39,7 +39,10 @@ function App() {
               <UserDashboardHome />
             </PrivateRoute>
           }
-        />
+        >
+          <Route path="action-history" element={<ActionHistoryPage />} />
+
+          </Route>
 
         {/* User Account Pages */}
         <Route

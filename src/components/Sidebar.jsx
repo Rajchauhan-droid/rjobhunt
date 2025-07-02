@@ -37,7 +37,9 @@ const Sidebar = ({ userType }) => {
   ];
 
   return (
-    <aside className="w-64 h-full fixed top-0 left-0 bg-white pt-16 border-r shadow-md">
+    <aside className="w-64 min-h-screen fixed top-0 left-0 bg-white pt-16 border-r shadow-md">
+
+    {/* <aside className="w-64 h-full fixed top-0 left-0 bg-white pt-16 border-r shadow-md"> */}
       {/* Logo */}
       {/* <div className="flex items-center justify-center mb-6">
         <img src="/logo.png" alt="Logo" className="w-32" />

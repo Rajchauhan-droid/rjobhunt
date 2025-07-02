@@ -1,4 +1,3 @@
-// src/components/ManageUsersTable.jsx
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { toast } from "react-hot-toast";
@@ -16,7 +15,6 @@ const ManageUsersTable = () => {
         const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/users/all`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-
         if (res.data.success) {
           setUsers(res.data.data);
         } else {
@@ -27,7 +25,6 @@ const ManageUsersTable = () => {
         toast.error("Failed to fetch users. Server may be down or endpoint incorrect.");
       }
     };
-
     fetchUsers();
   }, []);
 
@@ -54,16 +51,13 @@ const ManageUsersTable = () => {
     try {
       const token = localStorage.getItem("authToken");
       const endpoint = status === 1 ? "activateAccount" : "deactivateAccount";
-
       const res = await axios.patch(
         `${import.meta.env.VITE_API_BASE_URL}/api/users/admin/${endpoint}?publicId=${publicId}`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
-
       if (res.data?.success !== false) {
         toast.success(res.data.message || "Status updated successfully");
-
         setUsers((prev) =>
           prev.map((u) =>
             u.publicId === publicId
@@ -75,121 +69,149 @@ const ManageUsersTable = () => {
         toast.error(res.data.message || "Failed to update status");
       }
     } catch (err) {
-      const errorMsg =
-        err?.response?.data?.message || err?.response?.data?.error || "Server error";
+      const errorMsg = err?.response?.data?.message || "Server error";
       toast.error("Error: " + errorMsg);
       console.error("Account status toggle error:", err);
     }
   };
 
   return (
-    <div className="bg-gray-50 min-h-screen px-6 py-6">
-      <div className="max-w-screen-2xl mx-auto px-4">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-          <h1 className="text-4xl font-bold text-gray-800">Manage Users</h1>
-          <input
-            type="text"
-            placeholder="Search by any field..."
-            className="w-full md:w-1/2 border border-gray-300 px-4 py-2 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 text-base"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
+    <div className="space-y-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <h2 className="text-3xl font-bold text-gray-800">Manage Users</h2>
+        <input
+          type="text"
+          placeholder="Search users by any field..."
+          className="w-full md:w-1/2 border border-gray-300 px-4 py-2 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 text-base"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+      </div>
 
-        <div className="bg-white shadow-md rounded-lg overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200 text-sm sm:text-base">
-            <thead className="bg-gray-100 text-gray-700">
+      {/* Desktop Table */}
+      <div className="hidden md:block overflow-x-auto rounded-lg shadow">
+        <table className="min-w-full bg-white text-sm text-gray-700 border border-gray-200">
+          <thead className="bg-gray-100 sticky top-0 z-10">
+            <tr>
+              <th className="px-4 py-3 text-left font-semibold border-b">Public ID</th>
+              <th className="px-4 py-3 text-left font-semibold border-b">Email</th>
+              <th className="px-4 py-3 text-left font-semibold border-b">Role</th>
+              <th className="px-4 py-3 text-left font-semibold border-b">Phone</th>
+              <th className="px-4 py-3 text-left font-semibold border-b">Gender</th>
+              <th className="px-4 py-3 text-left font-semibold border-b">DOB</th>
+              <th className="px-4 py-3 text-left font-semibold border-b">Address</th>
+              <th className="px-4 py-3 text-left font-semibold border-b">Status</th>
+              <th className="px-4 py-3 text-right font-semibold border-b">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {paginatedUsers.length === 0 ? (
               <tr>
-                <th className="px-4 py-3 text-left">Public ID</th>
-                <th className="px-4 py-3 text-left">Email</th>
-                <th className="px-4 py-3 text-left">Role</th>
-                <th className="px-4 py-3 text-left">Phone</th>
-                <th className="px-4 py-3 text-left">Gender</th>
-                <th className="px-4 py-3 text-left">DOB</th>
-                <th className="px-4 py-3 text-left">Address</th>
-                <th className="px-4 py-3 text-left">Status</th>
-                <th className="px-4 py-3 text-left">Actions</th>
+                <td colSpan={9} className="px-4 py-6 text-center text-gray-500">
+                  No users found.
+                </td>
               </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200 text-gray-800">
-              {paginatedUsers.length === 0 ? (
-                <tr>
-                  <td colSpan={9} className="text-center py-12 text-gray-500">
-                    <div className="flex flex-col items-center">
-                      <span className="text-4xl mb-2">📂</span>
-                      <p className="text-lg">No users found</p>
-                    </div>
+            ) : (
+              paginatedUsers.map((user) => (
+                <tr key={user.publicId} className="hover:bg-gray-50 transition border-b last:border-b-0">
+                  <td className="px-4 py-3 break-all">{user.publicId}</td>
+                  <td className="px-4 py-3">{user.email}</td>
+                  <td className="px-4 py-3 capitalize">{user.role?.replace("ROLE_", "")}</td>
+                  <td className="px-4 py-3">{user.phoneNumber || "—"}</td>
+                  <td className="px-4 py-3">{user.gender || "—"}</td>
+                  <td className="px-4 py-3">{user.dateOfBirth ? new Date(user.dateOfBirth).toLocaleDateString() : "—"}</td>
+                  <td className="px-4 py-3">{user.address || "—"}</td>
+                  <td className="px-4 py-3">
+                    <span
+                      className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
+                        user.accountStatus?.statusId === 1
+                          ? "bg-green-100 text-green-700"
+                          : "bg-red-100 text-red-700"
+                      }`}
+                    >
+                      {user.accountStatus?.statusId === 1 ? "Active" : "Inactive"}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-right space-x-2">
+                    <button className="px-3 py-1 rounded-md bg-yellow-500 text-white hover:bg-yellow-600 transition">Edit</button>
+                    <button
+                      onClick={() => toggleAccountStatus(user.publicId, user.accountStatus?.statusId === 1 ? 2 : 1)}
+                      className={`px-3 py-1 rounded-md ${
+                        user.accountStatus?.statusId === 1
+                          ? "bg-red-500 hover:bg-red-600"
+                          : "bg-green-500 hover:bg-green-600"
+                      } text-white transition`}
+                    >
+                      {user.accountStatus?.statusId === 1 ? "Suspend" : "Activate"}
+                    </button>
                   </td>
                 </tr>
-              ) : (
-                paginatedUsers.map((user, idx) => (
-                  <tr key={idx} className="hover:bg-gray-50 transition">
-                    <td className="px-4 py-2 break-all">{user.publicId}</td>
-                    <td className="px-4 py-2">{user.email}</td>
-                    <td className="px-4 py-2 capitalize">
-                      {user.role?.replace("ROLE_", "")}
-                    </td>
-                    <td className="px-4 py-2">{user.phoneNumber || "—"}</td>
-                    <td className="px-4 py-2">{user.gender || "—"}</td>
-                    <td className="px-4 py-2">
-                      {user.dateOfBirth
-                        ? new Date(user.dateOfBirth).toLocaleDateString()
-                        : "—"}
-                    </td>
-                    <td className="px-4 py-2">{user.address || "—"}</td>
-                    <td className="px-4 py-2">
-                      {user.accountStatus?.statusId === 1 ? (
-                        <span className="text-green-600 font-semibold">Active</span>
-                      ) : (
-                        <span className="text-red-600 font-semibold">Suspended</span>
-                      )}
-                    </td>
-                    <td className="px-4 py-2 flex flex-wrap gap-2">
-                      <button className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">
-                        View
-                      </button>
-                      <button className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600">
-                        Update
-                      </button>
-                      <button
-                        onClick={() =>
-                          toggleAccountStatus(
-                            user.publicId,
-                            user.accountStatus?.statusId === 1 ? 2 : 1
-                          )
-                        }
-                        className={`${
-                          user.accountStatus?.statusId === 1
-                            ? "bg-red-600 hover:bg-red-700"
-                            : "bg-green-600 hover:bg-green-700"
-                        } text-white px-3 py-1 rounded`}
-                      >
-                        {user.accountStatus?.statusId === 1 ? "Suspend" : "Activate"}
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
 
-        {/* Pagination */}
-        <div className="flex justify-center mt-6 gap-2 flex-wrap">
-          {[...Array(totalPages)].map((_, i) => (
-            <button
-              key={i}
-              onClick={() => setCurrentPage(i + 1)}
-              className={`px-3 py-1 rounded ${
-                currentPage === i + 1
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-200 text-gray-700 hover:bg-blue-100"
-              }`}
-            >
-              {i + 1}
-            </button>
-          ))}
-        </div>
+      {/* Mobile Cards */}
+      <div className="space-y-4 md:hidden">
+        {paginatedUsers.length === 0 ? (
+          <p className="text-center text-gray-500">No users found.</p>
+        ) : (
+          paginatedUsers.map((user) => (
+            <div key={user.publicId} className="bg-white rounded-lg shadow p-4 border">
+              <div className="flex justify-between items-center mb-2">
+                <h3 className="font-semibold text-gray-800 break-all">{user.email}</h3>
+                <span
+                  className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
+                    user.accountStatus?.statusId === 1
+                      ? "bg-green-100 text-green-700"
+                      : "bg-red-100 text-red-700"
+                  }`}
+                >
+                  {user.accountStatus?.statusId === 1 ? "Active" : "Inactive"}
+                </span>
+              </div>
+              <div className="text-sm text-gray-700 space-y-1">
+                <p><span className="font-medium">Public ID:</span> {user.publicId}</p>
+                <p><span className="font-medium">Role:</span> {user.role?.replace("ROLE_", "")}</p>
+                <p><span className="font-medium">Phone:</span> {user.phoneNumber || "—"}</p>
+                <p><span className="font-medium">Gender:</span> {user.gender || "—"}</p>
+                <p><span className="font-medium">DOB:</span> {user.dateOfBirth ? new Date(user.dateOfBirth).toLocaleDateString() : "—"}</p>
+                <p><span className="font-medium">Address:</span> {user.address || "—"}</p>
+              </div>
+              <div className="flex justify-end gap-2 mt-3">
+                <button className="px-3 py-1 rounded-md bg-yellow-500 text-white hover:bg-yellow-600 transition">Edit</button>
+                <button
+                  onClick={() => toggleAccountStatus(user.publicId, user.accountStatus?.statusId === 1 ? 2 : 1)}
+                  className={`px-3 py-1 rounded-md ${
+                    user.accountStatus?.statusId === 1
+                      ? "bg-red-500 hover:bg-red-600"
+                      : "bg-green-500 hover:bg-green-600"
+                  } text-white transition`}
+                >
+                  {user.accountStatus?.statusId === 1 ? "Suspend" : "Activate"}
+                </button>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* Pagination */}
+      <div className="flex justify-center mt-4 flex-wrap gap-2">
+        {[...Array(totalPages)].map((_, i) => (
+          <button
+            key={i}
+            onClick={() => setCurrentPage(i + 1)}
+            className={`px-3 py-1 rounded ${
+              currentPage === i + 1
+                ? "bg-blue-600 text-white"
+                : "bg-gray-200 text-gray-700 hover:bg-blue-100"
+            }`}
+          >
+            {i + 1}
+          </button>
+        ))}
       </div>
     </div>
   );

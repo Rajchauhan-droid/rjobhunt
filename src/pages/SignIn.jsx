@@ -30,6 +30,8 @@ const SignIn = () => {
         form,
         {
           headers: { "Content-Type": "application/json" },
+              withCredentials: true,  // ✅ tells browser to accept cookies from cross-origin responses
+
         }
       );
 

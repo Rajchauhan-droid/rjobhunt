@@ -19,6 +19,8 @@ import AdminDashboardLayout from "./pages/AdminDashboardLayout";
 import ActionHistoryPage from "./pages/ActionHistoryPage";
 import ManageUsers from "./pages/admin/ManageUsers";
 import ManagePlatformPage from "./pages/admin/ManagePlatformPage"
+import UserScraperPage from "./pages/UserScraperPage"
+
 
 function App() {
   return (
@@ -42,6 +44,7 @@ function App() {
           }
         >
           <Route path="action-history" element={<ActionHistoryPage />} />
+          <Route path="scraping" element={<UserScraperPage />} />
 
           </Route>
 

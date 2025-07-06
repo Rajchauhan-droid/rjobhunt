@@ -1,24 +1,29 @@
-// src/layouts/UserDashboardLayout.jsx
-import React from "react";
-import Sidebar from "../components/Sidebar";
+import React, { useState } from "react";
+import UserSidebar from "../components/Sidebar";
 import ProfileMenu from "../components/ProfileMenu";
 import { Outlet } from "react-router-dom";
 
 const UserDashboardLayout = () => {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   return (
-    <div className="flex h-screen overflow-hidden">
-      {/* Sidebar */}
-      <Sidebar userType="user" />
-
-      {/* Main content */}
-      <div className="flex-1 flex flex-col overflow-hidden ml-64">
-        {/* Header */}
-        <header className="h-16 fixed top-0 left-64 right-0 bg-white shadow z-20 flex justify-end items-center px-6">
+    <div className="flex flex-col h-screen overflow-hidden" style={{ backgroundColor: "#F5F9FC" }}>
+      {/* Header */}
+      <header className="fixed inset-x-0 top-0 z-30 flex items-center justify-between bg-white border-b h-16 px-4 lg:px-6 shadow-sm">
+        <button
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          className="lg:hidden text-gray-700 hover:text-gray-900 focus:outline-none"
+        >
+          ☰
+        </button>
+        <div className="flex-1 flex justify-end">
           <ProfileMenu />
-        </header>
+        </div>
+      </header>
 
-        {/* Page content with top padding for header */}
-        <main className="pt-12 px-4 h-full overflow-y-auto bg-gray-50">
+      <div className="flex flex-1 pt-4 overflow-hidden">
+        <UserSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:ml-64" >
           <Outlet />
         </main>
       </div>

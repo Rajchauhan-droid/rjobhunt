@@ -18,6 +18,9 @@ import LoginSecurity from "./pages/account/LoginSecurity";
 import AdminDashboardLayout from "./pages/AdminDashboardLayout";
 import ActionHistoryPage from "./pages/ActionHistoryPage";
 import ManageUsers from "./pages/admin/ManageUsers";
+import ManagePlatformPage from "./pages/admin/ManagePlatformPage"
+import UserScraperPage from "./pages/UserScraperPage"
+
 
 function App() {
   return (
@@ -41,6 +44,7 @@ function App() {
           }
         >
           <Route path="action-history" element={<ActionHistoryPage />} />
+          <Route path="scraping" element={<UserScraperPage />} />
 
           </Route>
 
@@ -82,6 +86,8 @@ function App() {
           <Route index element={<h2 className="text-xl">Welcome to Admin Dashboard</h2>} />
           <Route path="action-history" element={<ActionHistoryPage />} />
           <Route path="manage-users" element={<ManageUsers />} />
+          <Route path="manage-platform" element={<ManagePlatformPage />} />
+
         </Route>
 
         {/* 404 Catch-All */}

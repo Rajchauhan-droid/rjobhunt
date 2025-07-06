@@ -1,91 +1,70 @@
-// src/components/Sidebar.jsx
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
   Home,
   History,
   User,
-  Briefcase,
-  MoreHorizontal,
-  LogOut,
-  Settings,
   Bookmark,
-  FileText
+  FileText,
+  Settings,
+  X,
 } from "lucide-react";
 
-const Sidebar = ({ userType }) => {
+const Sidebar = ({ isOpen, onClose }) => {
   const location = useLocation();
-  const basePath = userType === "admin" ? "/admin-dashboard" : "/user-dashboard";
+  const basePath = "/user-dashboard";
 
   const menuItems = [
-    { label: "Home", icon: <Home size={24} />, path: "" },
-    { label: "Action History", icon: <History size={24} />, path: "action-history" },
-    { label: "Profile", icon: <User size={24} />, path: "profile" },
-    {
-      label: "Jobs",
-      icon: <Briefcase size={24} />,
-      path: "jobs",
-      subRoutes: [
-        { label: "Saved Jobs", path: "jobs/saved", icon: <Bookmark size={20} /> },
-        { label: "Applied Jobs", path: "jobs/applied", icon: <FileText size={20} /> }
-      ]
-    },
-    ...(userType === "admin"
-      ? [{ label: "Others", icon: <MoreHorizontal size={24} />, path: "others" }]
-      : []),
-    { label: "Settings", icon: <Settings size={24} />, path: "settings" }
+    { label: "Home", icon: <Home size={22} />, path: "" },
+    { label: "Action History", icon: <History size={22} />, path: "action-history" },
+    { label: "Profile", icon: <User size={22} />, path: "profile" },
+    { label: "Saved Jobs", icon: <Bookmark size={22} />, path: "jobs/saved" },
+    { label: "Applied Jobs", icon: <FileText size={22} />, path: "jobs/applied" },
+    { label: "Scraping", icon: <FileText size={22} />, path: "scraping" }, // ⬅️ NEW ITEM
+    { label: "Settings", icon: <Settings size={22} />, path: "settings" },
   ];
-
   return (
-    <aside className="w-64 h-full fixed top-0 left-0 bg-white pt-16 border-r shadow-md">
-      {/* Logo */}
-      {/* <div className="flex items-center justify-center mb-6">
-        <img src="/logo.png" alt="Logo" className="w-32" />
-      </div> */}
+    <>
+      {/* Overlay for mobile */}
+      <div
+        className={`fixed inset-0 z-40 bg-black bg-opacity-30 transition-opacity lg:hidden ${isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+          }`}
+        onClick={onClose}
+      />
 
-      {/* Navigation Menu */}
-      <nav className="flex flex-col space-y-2 px-6 text-lg">
-        {menuItems.map(({ label, icon, path, subRoutes }) => {
-          const fullPath = `${basePath}/${path}`;
-          const isActive = location.pathname === fullPath;
+      <aside
+        className={`fixed top-0 left-0 z-50 w-64 min-h-screen bg-white border-r shadow-sm pt-16 transition-transform duration-300 ${isOpen ? "translate-x-0" : "-translate-x-full"
+          } lg:translate-x-0`}
+      >
+        {/* Close button on mobile */}
+        <div className="absolute top-4 right-4 lg:hidden">
+          <button onClick={onClose} className="text-gray-600 hover:text-gray-800">
+            <X size={24} />
+          </button>
+        </div>
 
-          return (
-            <div key={label} className="space-y-1">
+        <nav className="flex flex-col space-y-1 px-4 text-base font-medium">
+          {menuItems.map(({ label, icon, path }) => {
+            const fullPath = `${basePath}/${path}`;
+            const isActive = location.pathname === fullPath;
+            return (
               <Link
+                key={label}
                 to={fullPath}
-                className={`flex items-center gap-4 px-4 py-3 rounded-lg transition font-semibold ${
-                  isActive ? "bg-blue-100 text-blue-700" : "text-gray-700 hover:bg-gray-100"
-                }`}
+                onClick={onClose}
+                className={`flex items-center gap-3 rounded-md px-4 py-3 transition ${isActive
+                    ? "bg-blue-100 text-blue-700"
+                    : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                  }`}
               >
                 {icon}
                 <span>{label}</span>
               </Link>
-
-              {subRoutes && location.pathname.startsWith(fullPath) && (
-                <div className="ml-8 space-y-1">
-                  {subRoutes.map(({ label: subLabel, path: subPath, icon: subIcon }) => {
-                    const fullSubPath = `${basePath}/${subPath}`;
-                    const isSubActive = location.pathname === fullSubPath;
-                    return (
-                      <Link
-                        key={subLabel}
-                        to={fullSubPath}
-                        className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium ${
-                          isSubActive ? "bg-blue-50 text-blue-600" : "text-gray-600 hover:bg-gray-50"
-                        }`}
-                      >
-                        {subIcon}
-                        <span>{subLabel}</span>
-                      </Link>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </nav>
-    </aside>
+            );
+          })}
+        </nav>
+      </aside>
+    </>
   );
 };
 

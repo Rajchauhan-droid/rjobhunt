@@ -15,7 +15,7 @@ const Sidebar = ({ isOpen, onClose }) => {
   const basePath = "/user-dashboard";
 
   const menuItems = [
-    { label: "Home", icon: <Home size={22} />, path: "" },
+    { label: "Home", icon: <Home size={22} />, path: "home" },
     { label: "Action History", icon: <History size={22} />, path: "action-history" },
     { label: "Profile", icon: <User size={22} />, path: "profile" },
     { label: "Saved Jobs", icon: <Bookmark size={22} />, path: "jobs/saved" },

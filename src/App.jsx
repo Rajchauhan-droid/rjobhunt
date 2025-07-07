@@ -21,6 +21,8 @@ import ManageUsers from "./pages/admin/ManageUsers";
 import ManagePlatformPage from "./pages/admin/ManagePlatformPage"
 import UserScraperPage from "./pages/UserScraperPage"
 import UserHomePage from "./pages/user/UserHomePage";
+import JobPreferences from "./pages/account/JobPreferences";
+
 
 
 
@@ -50,8 +52,7 @@ function App() {
           <Route path="home" element={<UserHomePage />} />
 
 
-          </Route>
-
+        </Route>
         {/* User Account Pages */}
         <Route
           path="/account-settings"
@@ -77,6 +78,17 @@ function App() {
             </PrivateRoute>
           }
         />
+        <Route
+          path="/account/job-preferences"
+          element={
+            <PrivateRoute allowedRole={["user"]}>
+              <JobPreferences />
+            </PrivateRoute>
+          }
+        />
+
+
+
 
         {/* Admin Dashboard with Nested Routes */}
         <Route

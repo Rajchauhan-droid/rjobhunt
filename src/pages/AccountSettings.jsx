@@ -23,13 +23,19 @@ const AccountSettings = () => {
     },
     ...(role === "USER" || role === "ROLE_USER"
       ? [
-          {
-            title: "Job Preferences",
-            desc: "Manage your preferred job titles for smart suggestions",
-            link: "/account/job-preferences",
-            icon: "💼",
-          },
-        ]
+        {
+          title: "Job Preferences",
+          desc: "Manage your preferred job titles for smart suggestions",
+          link: "/account/job-preferences",
+          icon: "💼",
+        },
+        {
+          title: "Notification Preferences",
+          desc: "Manage how you get notified: email, SMS, Discord",
+          link: "/account/notification-preferences",
+          icon: "🔔",
+        }
+      ]
       : []),
   ];
 

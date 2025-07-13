@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-hot-toast";
+
 import {
   Search,
   MapPin,
@@ -25,9 +26,12 @@ const UserJobBoard = () => {
   const [location, setLocation] = useState("");
   const [sortBy, setSortBy] = useState("date");
   const [selectedCategory, setSelectedCategory] = useState("");
+  const [notifyEnabled, setNotifyEnabled] = useState(false);
+
+
   const navigate = useNavigate();
 
-  const fetchJobs = async (page = 1, keywordInput = "", where = "Canada", sort_by = "date", category = "") => {
+  const fetchJobs = async (page = 1, keywordInput = "", where = "Canada", sort_by = "date", category = "", notify = false) => {
     setLoading(true);
 
     const token = localStorage.getItem("authToken");
@@ -43,14 +47,16 @@ const UserJobBoard = () => {
     try {
       const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/jobs`, {
         headers: { Authorization: `Bearer ${token}` },
-        params: {
-          keyword: searchKeyword,
-          where,
-          sort_by,
-          page,
-          category,
-          results_per_page: 20,
-        },
+          params: {
+            keyword: searchKeyword,
+            where,
+            sort_by,
+            page,
+            category,
+            results_per_page: 20,
+            notify: notify,
+            userId: user?.publicId, // assuming backend needs this to know who to notify
+          },
       });
 
       const jobList = Array.isArray(res.data?.data?.results) ? res.data.data.results : [];
@@ -96,7 +102,7 @@ const UserJobBoard = () => {
   const handleSearch = (e) => {
     e.preventDefault();
     setCurrentPage(1);
-    fetchJobs(1, keyword, location, sortBy, selectedCategory);
+    fetchJobs(1, keyword, location, sortBy, selectedCategory, notifyEnabled);
   };
 
   const handleClearFilters = () => {
@@ -105,13 +111,14 @@ const UserJobBoard = () => {
     setSortBy("date");
     setSelectedCategory("");
     setCurrentPage(1);
+    setNotifyEnabled(false);
     fetchJobs(1, "", "Canada", "date");
   };
 
   const handlePageChange = (newPage) => {
     if (newPage < 1 || newPage > totalPages) return;
     setCurrentPage(newPage);
-    fetchJobs(newPage, keyword, location, sortBy, selectedCategory);
+    fetchJobs(newPage, keyword, location, sortBy, selectedCategory, notifyEnabled);
   };
 
   return (
@@ -149,29 +156,51 @@ const UserJobBoard = () => {
           </div>
         )}
 
-        {/* Search Form */}
-        <form onSubmit={handleSearch} className="bg-white rounded-2xl shadow border p-4 w-full space-y-4 md:space-y-0 md:flex md:items-end gap-4">
+      {/* Search Form and the startintg pointKeyword Input */}
+        <form
+          onSubmit={handleSearch}
+          className="bg-white rounded-2xl shadow border p-4 w-full space-y-4 md:space-y-0 md:flex md:items-end gap-4"
+        >
+          {/* Keyword Input */}
           <div className="flex-grow">
             <label className="block text-sm font-medium text-gray-700 mb-1">Keyword</label>
             <div className="flex items-center border rounded-lg px-3 py-2 shadow-sm">
               <Search className="text-gray-500" size={16} />
-              <input type="text" placeholder="e.g., Software Engineer" value={keyword} onChange={(e) => setKeyword(e.target.value)} className="flex-grow outline-none ml-2 text-sm" />
+              <input
+                type="text"
+                placeholder="e.g., Software Engineer"
+                value={keyword}
+                onChange={(e) => setKeyword(e.target.value)}
+                className="flex-grow outline-none ml-2 text-sm"
+              />
             </div>
           </div>
 
+          {/* Location Input */}
           <div className="flex-grow">
             <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
             <div className="flex items-center border rounded-lg px-3 py-2 shadow-sm">
               <MapPin className="text-gray-500" size={16} />
-              <input type="text" placeholder="e.g., Toronto, Canada" value={location} onChange={(e) => setLocation(e.target.value)} className="flex-grow outline-none ml-2 text-sm" />
+              <input
+                type="text"
+                placeholder="e.g., Toronto, Canada"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                className="flex-grow outline-none ml-2 text-sm"
+              />
             </div>
           </div>
 
+          {/* Sort By */}
           <div className="w-full md:w-40">
             <label className="block text-sm font-medium text-gray-700 mb-1">Sort By</label>
             <div className="flex items-center border rounded-lg px-3 py-2 shadow-sm">
               <SlidersHorizontal className="text-gray-500" size={16} />
-              <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="flex-grow outline-none ml-2 text-sm bg-transparent">
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="flex-grow outline-none ml-2 text-sm bg-transparent"
+              >
                 <option value="date">Date</option>
                 <option value="relevance">Relevance</option>
                 <option value="salary">Salary</option>
@@ -180,7 +209,25 @@ const UserJobBoard = () => {
             </div>
           </div>
 
-          <button type="submit" className="flex items-center bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg px-4 py-2 transition shadow focus:ring-2 focus:ring-blue-300">
+          {/* Notify Checkbox */}
+          <div className="flex items-center space-x-2 pb-2">
+            <input
+              type="checkbox"
+              id="notifyCheckbox"
+              checked={notifyEnabled}
+              onChange={(e) => setNotifyEnabled(e.target.checked)}
+              className="accent-blue-600 w-4 h-4"
+            />
+            <label htmlFor="notifyCheckbox" className="text-sm text-gray-700 font-medium">
+              Notify me about these jobs
+            </label>
+          </div>
+
+          {/* Submit Button */}
+          <button
+            type="submit"
+            className="flex items-center bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg px-4 py-2 transition shadow focus:ring-2 focus:ring-blue-300"
+          >
             <Filter size={16} className="mr-2" /> Search
           </button>
         </form>
@@ -190,6 +237,7 @@ const UserJobBoard = () => {
             <XCircle size={16} /> Clear Filters
           </button>
         </div>
+
 
         {/* Job List */}
         <div className="flex flex-col lg:flex-row gap-6">

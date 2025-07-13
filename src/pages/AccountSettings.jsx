@@ -1,24 +1,43 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
-const settings = [
-  {
-    title: "Personal info",
-    desc: "Provide personal details and how we can reach you",
-    link: "/account/personal-info",
-    icon: "👤",
-  },
-  {
-    title: "Login & security",
-    desc: "Update your password and secure your account",
-    link: "/account/login-security",
-    icon: "🔐",
-  },
-
-];
-
 const AccountSettings = () => {
   const navigate = useNavigate();
+  const user = JSON.parse(localStorage.getItem("loggedInUser"));
+  const role = user?.role?.toUpperCase(); // normalize the role
+  const email = user?.email || "";
+  const name = user?.name || "User";
+
+  const settings = [
+    {
+      title: "Personal info",
+      desc: "Provide personal details and how we can reach you",
+      link: "/account/personal-info",
+      icon: "👤",
+    },
+    {
+      title: "Login & security",
+      desc: "Update your password and secure your account",
+      link: "/account/login-security",
+      icon: "🔐",
+    },
+    ...(role === "USER" || role === "ROLE_USER"
+      ? [
+        {
+          title: "Job Preferences",
+          desc: "Manage your preferred job titles for smart suggestions",
+          link: "/account/job-preferences",
+          icon: "💼",
+        },
+        {
+          title: "Notification Preferences",
+          desc: "Manage how you get notified: email, SMS, Discord",
+          link: "/account/notification-preferences",
+          icon: "🔔",
+        }
+      ]
+      : []),
+  ];
 
   return (
     <div className="min-h-screen bg-blue-50 p-6 md:p-12">
@@ -33,7 +52,7 @@ const AccountSettings = () => {
           </button>
         </div>
         <p className="text-gray-700 font-semibold mb-8">
-          Raj Chauhan, <span className="text-gray-600">raajchauh@gmail.com</span>
+          {name}, <span className="text-gray-600">{email}</span>
         </p>
 
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -44,7 +63,9 @@ const AccountSettings = () => {
               className="cursor-pointer bg-white rounded-xl shadow hover:shadow-md p-5 transition"
             >
               <div className="text-3xl mb-3">{item.icon}</div>
-              <h3 className="text-lg font-semibold text-gray-800 mb-1">{item.title}</h3>
+              <h3 className="text-lg font-semibold text-gray-800 mb-1">
+                {item.title}
+              </h3>
               <p className="text-sm text-gray-600">{item.desc}</p>
             </div>
           ))}

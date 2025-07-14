@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import PlatformModal from "../components/PlatformModal";
-import ViewPlatformModal from "../components/ViewPlatformModal"; // ⬅️ import at top
+import ViewPlatformModal from "../components/ViewPlatformModal"; 
 import { toast } from "react-hot-toast";
 
 const ManagePlatformPage = () => {

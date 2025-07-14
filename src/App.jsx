@@ -23,6 +23,7 @@ import UserScraperPage from "./pages/UserScraperPage"
 import UserHomePage from "./pages/user/UserHomePage";
 import JobPreferences from "./pages/account/JobPreferences";
 import NotificationPreferences from "./pages/account/NotificationPreferences"
+import AdminReportPage from "./pages/admin/AdminReportPage";
 
 
 function App() {
@@ -111,6 +112,8 @@ function App() {
           <Route path="action-history" element={<ActionHistoryPage />} />
           <Route path="manage-users" element={<ManageUsers />} />
           <Route path="manage-platform" element={<ManagePlatformPage />} />
+          <Route path="reports" element={<AdminReportPage />} />
+
 
         </Route>
 

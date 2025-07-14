@@ -17,11 +17,7 @@ const Sidebar = ({ isOpen, onClose }) => {
   const menuItems = [
     { label: "Home", icon: <Home size={22} />, path: "home" },
     { label: "Action History", icon: <History size={22} />, path: "action-history" },
-    { label: "Profile", icon: <User size={22} />, path: "profile" },
-    { label: "Saved Jobs", icon: <Bookmark size={22} />, path: "jobs/saved" },
-    { label: "Applied Jobs", icon: <FileText size={22} />, path: "jobs/applied" },
     { label: "Scraping", icon: <FileText size={22} />, path: "scraping" }, // ⬅️ NEW ITEM
-    { label: "Settings", icon: <Settings size={22} />, path: "settings" },
   ];
   return (
     <>

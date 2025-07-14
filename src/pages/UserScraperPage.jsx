@@ -9,6 +9,7 @@ import "sweetalert2/dist/sweetalert2.min.css"; // optional but recommended for s
 import ScrapingHistory from "../pages/components/ScrapingHistory"; // adjust path if needed
 
 
+
 const UserScraperPage = () => {
   const [platforms, setPlatforms] = useState([]);
   const [formData, setFormData] = useState({ platformId: "", query: "", location: "", maxPages: 5 });
@@ -22,6 +23,7 @@ const UserScraperPage = () => {
   const navigate = useNavigate();
   const sourceRef = useRef(null); // 🔥 SSE connection ref
   const [showHistory, setShowHistory] = useState(false);
+  const [notifyEnabled, setNotifyEnabled] = useState(false);
 
 
   useEffect(() => {
@@ -150,12 +152,17 @@ const UserScraperPage = () => {
         location: formData.location,
         maxPages: parseInt(formData.maxPages, 10),
         profileKeywords: keywords,
+        notify: notifyEnabled, // 👈 Add this
       };
 
       await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/scraper/start`, payload, {
         headers: { Authorization: `Bearer ${token}` },
       });
       toast.success("Scraper started. Listening for real-time jobs...");
+      
+      if (notifyEnabled) {
+        toast.success("You will be notified when new jobs matching this query appear.");
+      }
     } catch (err) {
       console.error(err);
       if ([401, 403].includes(err.response?.status)) navigate("/unauthorized");
@@ -283,33 +290,50 @@ const UserScraperPage = () => {
               />
             </div>
 
+            <div className="flex items-center gap-2 pt-2">
+            <input
+              type="checkbox"
+              id="notifyCheckbox"
+              checked={notifyEnabled}
+              onChange={(e) => setNotifyEnabled(e.target.checked)}
+              className="accent-blue-600 w-4 h-4"
+            />
+            <label htmlFor="notifyCheckbox" className="text-sm text-gray-700 font-medium">
+              Notify me about these jobs
+            </label>
+          </div>
+
             <div className="text-right">
-              <button
-                type="submit"
-                disabled={submitting}
-                className="inline-flex items-center px-6 py-3 rounded-md text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transition disabled:opacity-50"
-              >
-                {submitting ? (
-                  <>
-                    <Loader2 className="animate-spin mr-2" size={18} />
-                    Submitting...
-                  </>
+              <div className="text-right">
+                {!loadingJobs ? (
+                  <button
+                    type="submit"
+                    disabled={submitting}
+                    className="inline-flex items-center px-6 py-3 rounded-md text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transition disabled:opacity-50"
+                  >
+                    {submitting ? (
+                      <>
+                        <Loader2 className="animate-spin mr-2" size={18} />
+                        Submitting...
+                      </>
+                    ) : (
+                      <>
+                        <PlayCircle size={18} className="mr-2" />
+                        Submit Scraper Request
+                      </>
+                    )}
+                  </button>
                 ) : (
-                  <>
-                    <PlayCircle size={18} className="mr-2" />
-                    Submit Scraper Request
-                  </>
+                  <button
+                    type="button"
+                    onClick={handleStopScraping}
+                    className="inline-flex items-center px-6 py-3 rounded-md text-white bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 transition"
+                  >
+                    Stop Scraper
+                  </button>
                 )}
-              </button>
-              {loadingJobs && (
-                <button
-                  type="button"
-                  onClick={handleStopScraping}
-                  className="inline-flex items-center px-6 py-3 rounded-md text-white bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 transition ml-4"
-                >
-                  Stop Scraper
-                </button>
-              )}
+              </div>
+
             </div>
           </form>
         </div>

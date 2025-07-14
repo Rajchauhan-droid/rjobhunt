@@ -24,6 +24,7 @@ import UserHomePage from "./pages/user/UserHomePage";
 import JobPreferences from "./pages/account/JobPreferences";
 import NotificationPreferences from "./pages/account/NotificationPreferences"
 import AdminReportPage from "./pages/admin/AdminReportPage";
+import AdminHomePage from "./pages/admin/AdminHomePage";
 
 
 function App() {
@@ -47,12 +48,15 @@ function App() {
             </PrivateRoute>
           }
         >
+          {/* ✅ This will now be the default route at /user-dashboard */}
+          <Route index element={<UserHomePage />} /> 
+
+          {/* Other subroutes */}
+          <Route path="home" element={<UserHomePage />} />
           <Route path="action-history" element={<ActionHistoryPage />} />
           <Route path="scraping" element={<UserScraperPage />} />
-          <Route path="home" element={<UserHomePage />} />
-
-
         </Route>
+        
         {/* User Account Pages */}
         <Route
           path="/account-settings"
@@ -108,7 +112,7 @@ function App() {
             </PrivateRoute>
           }
         >
-          <Route index element={<h2 className="text-xl">Welcome to Admin Dashboard</h2>} />
+          <Route index element={<AdminHomePage />}/>
           <Route path="action-history" element={<ActionHistoryPage />} />
           <Route path="manage-users" element={<ManageUsers />} />
           <Route path="manage-platform" element={<ManagePlatformPage />} />

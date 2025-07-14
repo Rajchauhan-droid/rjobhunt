@@ -12,10 +12,7 @@ const AdminSidebar = ({ isOpen, onClose }) => {
     { label: "Manage Platform", icon: <Server size={22} />, path: "manage-platform" },
     { label: "Action History", icon: <History size={22} />, path: "action-history" },
     { label: "Manage Users", icon: <Users size={22} />, path: "manage-users" },
-    { label: "Verify Accounts", icon: <UserCheck size={22} />, path: "verify-accounts" },
     { label: "Reports", icon: <FileText size={22} />, path: "reports" },
-    { label: "Settings", icon: <Settings size={22} />, path: "settings" },
-    { label: "Others", icon: <MoreHorizontal size={22} />, path: "others" }
   ];
 
   return (
